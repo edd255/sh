@@ -4,6 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include "../libs/colorprint.h"
 #include "sh.h"
 
 #define BUFSIZE 64
@@ -139,9 +140,16 @@ int main(int argc, char** argv)
         char* line;
         char** args;
         int status;
+        char* username = getlogin();
+        char hostname[256];
+        if (gethostname(hostname, sizeof(hostname)) == -1 || username == NULL) {
+                fprintf(stderr, "sh: could not access hostname or username");
+        }
 
         do {
-                printf("$ ");
+                char cwd[1024];
+                getcwd(cwd, sizeof(cwd));
+                printf_color(1, "[g]\e[1m%s\e[m[/g]:[r][[/r][b]\e[1m%s\e[m[/b][r]][/r]:[m]%s[/m][y]$[/y] ", hostname, username, cwd);
                 char* line = sh_read_line();
                 args = sh_split_line(line);
                 status = sh_execute(args);
