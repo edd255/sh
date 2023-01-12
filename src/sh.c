@@ -149,7 +149,7 @@ int main(int argc, char** argv)
         do {
                 char cwd[1024];
                 getcwd(cwd, sizeof(cwd));
-                printf_color(1, "[g]\e[1m%s\e[m[/g]:[r][[/r][b]\e[1m%s\e[m[/b][r]][/r]:[m]%s[/m][y]$[/y] ", hostname, username, cwd);
+                printf_color(1, "[g]\e[1m%s\e[m[/g]:[r][[/r][b]\e[1m%s\e[m[/b][r]][/r]:[m]%s[/m][y]\e[1m$\e[m[/y] ", hostname, username, cwd);
                 char* line = sh_read_line();
                 args = sh_split_line(line);
                 status = sh_execute(args);
