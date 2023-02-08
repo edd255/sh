@@ -57,9 +57,6 @@ char** sh_split_line(char* line)
 
 int sh_launch(char** args)
 {
-        pid_t wpid;
-        int status;
-
         pid_t pid = fork();
         if (pid == 0) {
                 // Child process
@@ -71,9 +68,9 @@ int sh_launch(char** args)
                 perror("sh: pid is smaller than 0");
                 return 0;
         } 
-
+        int status;
         do {
-                wpid = waitpid(pid, &status, WUNTRACED);
+                waitpid(pid, &status, WUNTRACED);
         } while (!WIFEXITED(status) && !WIFSIGNALED(status));
         return 1;
 }
@@ -98,7 +95,7 @@ int sh_cd(char** args) {
 }
 
 
-int sh_help(char** args) {
+int sh_help() {
         printf("SHELL\n");
         printf("Built-ins:\n");
         for (int i = 0; i < 3; i++) {
@@ -108,7 +105,7 @@ int sh_help(char** args) {
 }
 
 
-int sh_exit(char** args)
+int sh_exit()
 {
         return 0;
 }
@@ -135,21 +132,20 @@ int sh_execute(char** args)
 }
 
 
-int main(int argc, char** argv)
+int main()
 {
-        char* line;
         char** args;
         int status;
         char* username = getlogin();
         char hostname[256];
         if (gethostname(hostname, sizeof(hostname)) == -1 || username == NULL) {
                 fprintf(stderr, "sh: could not access hostname or username");
+                return EXIT_FAILURE;
         }
-
         do {
                 char cwd[1024];
                 getcwd(cwd, sizeof(cwd));
-                printf_color(1, "[g]\e[1m%s\e[m[/g]:[r][[/r][b]\e[1m%s\e[m[/b][r]][/r]:[m]%s[/m][y]\e[1m$\e[m[/y] ", hostname, username, cwd);
+                printf_color(1, "[g]\033[1m%s\033[m[/g]:[r][[/r][b]\033[1m%s\033[m[/b][r]][/r]:[m]%s[/m][y]\033[1m$\033[m[/y] ", hostname, username, cwd);
                 char* line = sh_read_line();
                 args = sh_split_line(line);
                 status = sh_execute(args);
