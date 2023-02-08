@@ -1,4 +1,4 @@
-lib=libs/colorprint.c
+lib=libs/colorful-printf/colorprint.c
 shell=src/sh.c
 
 all:
