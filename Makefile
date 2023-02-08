@@ -2,4 +2,4 @@ lib=libs/colorprint.c
 shell=src/sh.c
 
 all:
-	gcc ${shell} ${lib} -o sh
+	gcc -Wall -Wpedantic -Wextra -Werror -fsanitize=address -fsanitize=undefined ${shell} ${lib} -o sh
