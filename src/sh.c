@@ -10,6 +10,11 @@
 #define BUFSIZE 64
 #define DELIMITER " \t\r\n\a"
 
+#define UNUSED(x) \
+{                 \
+        (void) x; \
+}
+
 
 char* sh_read_line(void)
 {
@@ -29,12 +34,10 @@ char** sh_split_line(char* line)
         int bufsize = BUFSIZE;
         int position = 0;
         char** tokens = malloc(bufsize * sizeof(char*));
-
         if (tokens == NULL) {
                 fprintf(stderr, "sh: allocation error\n");
                 exit(EXIT_FAILURE);
         }
-
         char* token = strtok(line, DELIMITER);
         while (token != NULL) {
                 tokens[position] = token;
@@ -95,7 +98,8 @@ int sh_cd(char** args) {
 }
 
 
-int sh_help() {
+int sh_help(char** args) {
+        UNUSED(args);
         printf("SHELL\n");
         printf("Built-ins:\n");
         for (int i = 0; i < 3; i++) {
@@ -105,8 +109,9 @@ int sh_help() {
 }
 
 
-int sh_exit()
+int sh_exit(char** args)
 {
+        UNUSED(args);
         return 0;
 }
 
@@ -132,7 +137,7 @@ int sh_execute(char** args)
 }
 
 
-int main()
+int main(void)
 {
         char** args;
         int status;
