@@ -1,5 +1,15 @@
-lib=libs/colorful-printf/colorprint.c
-shell=src/sh.c
+CC   := clang
+LIB  := libs/colorful-printf/colorprint.c
+MAIN := src/sh.c
+OUT  := bin/sh
 
-all:
-	gcc -Wall -Wpedantic -Wextra -Werror -fsanitize=address -fsanitize=undefined ${shell} ${lib} -o sh
+ERROR_FLAGS  := -Wall -Wpedantic -Wextra -Werror
+DEBUG_FLAGS  := -Og -g -fsanitize=address -fsanitize=undefined
+OPT_FLAGS    := -Ofast
+
+
+debug:
+	${CC} ${COMMON_FLAGS} ${DEBUG_FLAGS} ${ERROR_FLAGS} ${MAIN} ${LIB} -o ${OUT}_debug
+
+opt:
+	${CC} ${COMMON_FLAGS} ${OPT_FLAGS} ${ERROR_FLAGS} ${MAIN} ${LIB} -o ${OUT}_opt
