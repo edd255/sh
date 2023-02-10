@@ -15,16 +15,16 @@
         (void) x; \
 }
 
+char* USERNAME;
+char HOSTNAME[256];
 
 char* sh_read_line(void)
 {
         char* line = NULL;
         size_t bufsize = 0;
-
         if (getline(&line, &bufsize, stdin) == -1) {
                 feof(stdin) ? exit(EXIT_SUCCESS) : exit(EXIT_FAILURE);
         }
-
         return line;
 }
 
@@ -70,7 +70,7 @@ int sh_launch(char** args)
         } else if (pid < 0) {
                 perror("sh: pid is smaller than 0");
                 return 0;
-        } 
+        }
         int status;
         do {
                 waitpid(pid, &status, WUNTRACED);
@@ -136,27 +136,44 @@ int sh_execute(char** args)
         return sh_launch(args);
 }
 
+int init_prompt(void)
+{
+        USERNAME = getlogin();
+        if (gethostname(HOSTNAME, sizeof(HOSTNAME)) == -1 || USERNAME == NULL) {
+                fprintf(stderr, "sh: could not access hostname/username");
+                return EXIT_FAILURE;
+        }
+        return EXIT_SUCCESS;
+}
+
+
+inline void draw_prompt(void)
+{
+        char cwd[1024];
+        getcwd(cwd, sizeof(cwd));
+        printf_color(
+                1,
+                "[g]\033[1m%s\033[m[/g]:[r][[/r][b]\033[1m%s\033[m[/b][r]][/r]:[m]%s[/m][y]\033[1m$\033[m[/y] ",
+                HOSTNAME,
+                USERNAME,
+                cwd
+        );
+}
+
 
 int main(void)
 {
-        char** args;
         int status;
-        char* username = getlogin();
-        char hostname[256];
-        if (gethostname(hostname, sizeof(hostname)) == -1 || username == NULL) {
-                fprintf(stderr, "sh: could not access hostname or username");
+        if (init_prompt() == EXIT_FAILURE) {
                 return EXIT_FAILURE;
         }
         do {
-                char cwd[1024];
-                getcwd(cwd, sizeof(cwd));
-                printf_color(1, "[g]\033[1m%s\033[m[/g]:[r][[/r][b]\033[1m%s\033[m[/b][r]][/r]:[m]%s[/m][y]\033[1m$\033[m[/y] ", hostname, username, cwd);
+                draw_prompt();
                 char* line = sh_read_line();
-                args = sh_split_line(line);
+                char** args = sh_split_line(line);
                 status = sh_execute(args);
-                free(line);
                 free(args);
+                free(line);
         } while (status);
-
         return EXIT_SUCCESS;
 }
