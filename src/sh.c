@@ -4,7 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#include "../libs/colorful-printf/colorprint.h"
+#include "../deps/colorful-printf/colorprint.h"
 #include "sh.h"
 
 #define BUFSIZE 64
