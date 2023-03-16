@@ -1,3 +1,0 @@
-[submodule "deps/colorful-printf"]
-	path = deps/colorful-printf
-	url = https://github.com/edd255/colorful-printf
