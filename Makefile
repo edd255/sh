@@ -22,7 +22,7 @@ Q     ?= @
 SRC_DIRS  := src $(wildcard ./deps/*)
 BUILD_DIR := build
 BIN_DIR   := bin
-INC_DIRS  := $(shell find $(SRC_DIRS) -type d)
+INC_DIRS  := .
 
 #---- FILES --------------------------------------------------------------------
 
@@ -34,19 +34,19 @@ DEPS := $(OBJS:.o=.d)
 #---- FLAGS --------------------------------------------------------------------
 
 LDFLAGS   += -ledit
-CFLAGS    := $(INC_FLAGS) -MMD -MP
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
+CFLAGS    := $(INC_FLAGS) 
 
 ERR := -Wall -Wpedantic -Wextra -Werror
 OPT := -Ofast -DNDEBUG
 DBG := -Og -g 
 SAN := -fsanitize=address \
-	   -fsanitize=pointer-compare \
-	   -fsanitize=pointer-subtract \
-	   -fsanitize=shadow-call-stack \
-	   -fsanitize=leak \
-	   -fsanitize=undefined \
-	   -fsanitize-address-use-after-scope
+       -fsanitize=pointer-compare \
+       -fsanitize=pointer-subtract \
+       -fsanitize=shadow-call-stack \
+       -fsanitize=leak \
+       -fsanitize=undefined \
+       -fsanitize-address-use-after-scope
 
 RELEASE   := ${ERR} ${OPT}
 DEBUGGING := ${ERR} ${DBG}
@@ -94,6 +94,7 @@ $(BUILD_DIR)/%.san.o: src/%.c
 .PHONY: all clean
 
 clean:
+	$(Q)echo "====> Cleaning the build directory"
 	$(Q)$(RM) --recursive $(BUILD_DIR)
 
 all: $(BIN)_release $(BIN)_debugging $(BIN)_sanitized
