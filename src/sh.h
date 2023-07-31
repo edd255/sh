@@ -11,7 +11,6 @@
 
 #define BUFSIZE 64
 #define DELIMITER " \t\r\n\a"
-#define PROMPT "[g]\033[1m%s\033[m[/g]:[r][[/r][b]\033[1m%s\033[m[/b][r]][/r]:[m]%s[/m][y]\033[1m$\033[m[/y] "
 
 #define UNUSED(x) (void) x
 

@@ -1,4 +1,4 @@
-#include "deps/colorful-printf/colorprint.h"
+#include "deps/color-sh/color-sh.h"
 #include "sh.h"
 
 //=== PARSING ==================================================================
@@ -135,7 +135,10 @@ static inline void draw_prompt(char* username, char* hostname)
 {
 	char cwd[1024];
 	getcwd(cwd, sizeof(cwd));
-	printf_color(1, PROMPT, hostname, username, cwd);
+    color_bgreen("%s@%s", hostname, username);
+    printf(":");
+    color_bpurple("%s", cwd);
+    color_byellow("$ ");
 }
 
 //=== MAIN =====================================================================
