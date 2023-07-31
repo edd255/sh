@@ -13,7 +13,7 @@
 
 #elif defined(__linux__) || (defined(__APPLE__) && defined(__MACH__)) || defined(__unix__)
     void set_color(char *color) {
-        printf(color);
+        printf("%s", color);
     }
 #else
     #error Platform not supported by color-sh lib
