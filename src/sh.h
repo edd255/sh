@@ -2,17 +2,16 @@
 #define SHELL_H
 
 #include <stdbool.h>
-#include <stdlib.h>
-#include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
-#define BUFSIZE 64
+#define BUFSIZE   64
 #define DELIMITER " \t\r\n\a"
 
-#define UNUSED(x) (void) x
+#define UNUSED(x) (void)x
 
 typedef struct prompt_t prompt_t;
 struct prompt_t {
