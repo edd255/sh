@@ -11,9 +11,14 @@ NOBOLD := \x1b[0m
 
 #---- TOOLS --------------------------------------------------------------------
 
-CCACHE := ccache
-CC     := $(CCACHE) clang
-LD     := $(CCACHE) clang
+CCACHE_EXISTS := $(bash -v ccache 2> /dev/null)
+ifeq ($(CCACHE_EXISTS),)
+	CC := clang
+	LD := clang
+else
+	CC := ccache clang
+	LD := ccache clang
+endif
 RM     := rm --force
 MKDIR  := mkdir --parents
 Q      ?= @
