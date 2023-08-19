@@ -1,70 +1,11 @@
-#==== DEFINITIONS ==============================================================
-#---- TARGET -------------------------------------------------------------------
-
-NAME    := sh
-VERSION := 0.1
-
-#---- COLORS -------------------------------------------------------------------
-
-BOLD   := \x1b[1m
-NOBOLD := \x1b[0m
-
-#---- TOOLS --------------------------------------------------------------------
-
-CCACHE_EXISTS := $(bash -v ccache 2> /dev/null)
-ifeq ($(CCACHE_EXISTS),)
-	CC := clang
-	LD := clang
-else
-	CC := ccache clang
-	LD := ccache clang
-endif
-RM     := rm --force
-MKDIR  := mkdir --parents
-Q      ?= @
-
-#---- DIRECTORIES --------------------------------------------------------------
-
-SRC_DIR   := src
-SRC_DIRS  := $(SRC_DIR) $(wildcard ./deps/*)
-BUILD_DIR := build
-BIN_DIR   := bin
-INC_DIRS  := .
-
-#---- FILES --------------------------------------------------------------------
-
-BIN  := $(BIN_DIR)/$(NAME)
-SRCS := $(shell find $(SRC_DIRS) -name '*.c')
-OBJS := $(SRCS:%.c=$(BUILD_DIR)/%.o)
-DEPS := $(OBJS:.o=.d)
-
-#---- FLAGS --------------------------------------------------------------------
-
-INC_FLAGS := $(addprefix -I,$(INC_DIRS))
-CFLAGS    := $(INC_FLAGS) -MMD -MP
-MAKEFLAGS := --jobs=$(shell nproc)
-
-ERR := -Wall -Wpedantic -Wextra -Werror
-OPT := -Ofast -DNDEBUG
-DBG := -Og -g 
-SAN := -fsanitize=address \
-	   -fsanitize=pointer-compare \
-	   -fsanitize=pointer-subtract \
-	   -fsanitize=shadow-call-stack \
-	   -fsanitize=leak \
-	   -fsanitize=undefined \
-	   -fsanitize-address-use-after-scope
-
-RELEASE   := ${ERR} ${OPT}
-DEBUGGING := ${ERR} ${DBG}
-MEMCHECK  := ${ERR} ${DBG} ${SAN}
+include .config/make/config.mk
 
 #==== RULES ====================================================================
 #---- RELEASE ------------------------------------------------------------------
 
-$(BIN)_release: $(patsubst src/%.c, build/%.opt.o, $(SRCS)) 
+$(BIN)_release: $(patsubst src/%.c, build/%.opt.o, $(SRCS))
 	$(Q)$(MKDIR) $(BIN_DIR)
-	$(Q)echo -e "${BOLD}====> LD $@${NOBOLD}"
+	$(Q)echo -e "====> LD $@"
 	$(Q)$(CC) $(RELEASE) $+ -o $@ $(LDFLAGS)
 
 $(BUILD_DIR)/%.opt.o: src/%.c
@@ -78,7 +19,7 @@ release: $(BIN)_release
 
 $(BIN)_debugging: $(patsubst src/%.c, build/%.dbg.o, $(SRCS)) 
 	$(Q)$(MKDIR) $(BIN_DIR)
-	$(Q)echo -e "${BOLD}====> LD $@${NOBOLD}"
+	$(Q)echo -e "====> LD $@"
 	$(Q)$(CC) $(DEBUGGING) $+ -o $@ $(LDFLAGS)
 
 $(BUILD_DIR)/%.dbg.o: src/%.c
@@ -88,35 +29,70 @@ $(BUILD_DIR)/%.dbg.o: src/%.c
 
 debugging: $(BIN)_debugging
 
-#---- MEMCHECK -----------------------------------------------------------------
+#---- SANITIZED ----------------------------------------------------------------
 
 $(BIN)_sanitized: $(patsubst src/%.c, build/%.san.o, $(SRCS)) 
 	$(Q)$(MKDIR) $(BIN_DIR)
-	$(Q)echo -e "${BOLD}====> LD $@${NOBOLD}"
-	$(Q)$(CC) $(MEMCHECK) $+ -o $@ $(LDFLAGS)
+	$(Q)echo -e "====> LD $@"
+	$(Q)$(CC) $(SANITIZED) $+ -o $@ $(LDFLAGS)
 
 $(BUILD_DIR)/%.san.o: src/%.c
 	$(Q)echo "====> CC $@"
 	$(Q)mkdir -p $(dir $@)
-	$(Q)$(CC) $(MEMCHECK) $(CFLAGS) -c $< -o $@
+	$(Q)$(CC) $(SANITIZED) $(CFLAGS) -c $< -o $@
 
-memcheck: $(BIN)_sanitized
+sanitized: $(BIN)_sanitized
 
 #---- CLEANING -----------------------------------------------------------------
 
 clean:
-	$(Q)$(RM) --recursive $(BUILD_DIR)
+	$(Q)echo "====> Cleaning..."
+	$(Q)$(RM) --recursive $(BUILD_DIR) || true
 
 #---- STYLE --------------------------------------------------------------------
 
 style:
 	$(Q)echo "====> Formatting..."
-	$(Q)find $(SRC_DIR) -iname *.h -o -iname *.c | xargs clang-format -i
+	$(Q)find $(SRC_DIR) -iname *.h -o -iname *.c | xargs clang-format -i $(CLANG_FMT_CONFIG)
+
+#---- ANALYSIS -----------------------------------------------------------------
+
+analyze:
+	$(Q)echo "====> Running scan-build..."
+	$(Q)scan-build make all
+	$(Q)echo "====> Running cppcheck..."
+	$(Q)cppcheck src/ $(CPPCHECK) 2> cppcheck.log
+	$(Q)echo "====> Running clang-tidy..."
+	$(Q)compiledb make all
+	$(Q)clang-tidy.py $(PROJ_SRCS) $(CLANG_TIDY_CONFIG)
+
+memcheck: debugging
+	$(Q)echo "====> Running valgrind..."
+	$(Q)valgrind ${VALGRIND_FLAGS} $(BIN)_debugging
+
+#---- INSTALLING ---------------------------------------------------------------
+
+install: release
+	$(Q)echo "====> Installing the binary..."
+	$(Q)cp $(BIN)_release $(PREFIX)/bin/$(NAME)
+	$(Q)echo "====> Installing the library..."
+	$(Q)$(MKDIR) $(PREFIX)/lib/lispy
+	$(Q)cp $(ASSETS)/stdlib/stdlib.lspy $(PREFIX)/lib/lispy/
+	$(Q)echo "====> Finished!"
+	
+uninstall:
+	$(Q)echo "====> Removing the binary..."
+	$(Q)$(RM) $(PREFIX)/bin/$(NAME)
+	$(Q)echo "====> Removing the library..."
+	$(Q)$(RM) $(PREFIX)/lib/lispy/stdlib.lspy
+	$(Q)rmdir $(PREFIX)/lib/lispy/
+	$(Q)echo "====> Finished!"
 
 #==== EPILOGUE =================================================================
 
-all: style release debugging memcheck
+all: style release debugging sanitized tests
+	$(Q)echo "====> Finished!"
 
 # Include the .d makefiles
 -include $(DEPS)
-.PHONY: all clean style
+.PHONY: all release debugging memcheck style install uninstall tests
