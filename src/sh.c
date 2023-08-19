@@ -1,6 +1,16 @@
 #include "sh.h"
 
+#include <errno.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
 #include "deps/color-sh/color-sh.h"
+
+void handle_cwd_error(char* file, int line, const char* fn);
 
 //=== PARSING ==================================================================
 
@@ -54,7 +64,7 @@ static int sh_launch(char** args) {
         perror("sh: pid is smaller than 0");
         return 0;
     }
-    int status;
+    int status = 0;
     do {
         waitpid(pid, &status, WUNTRACED);
     } while (!WIFEXITED(status) && !WIFSIGNALED(status));
@@ -119,17 +129,90 @@ static inline void init_prompt(prompt_t* prompt) {
 
 static inline void draw_prompt(char* username, char* hostname) {
     char cwd[1024];
-    getcwd(cwd, sizeof(cwd));
+    if (getcwd(cwd, sizeof(cwd)) == NULL) {
+        handle_cwd_error(__FILE_NAME__, __LINE__, __func__);
+        return;
+    }
     color_bgreen("%s@%s", hostname, username);
     printf(":");
     color_bpurple("%s", cwd);
     color_byellow("$ ");
 }
 
+void handle_cwd_error(char* file, int line, const char* fn) {
+    switch (errno) {
+        case EACCES: {
+            fprintf(
+                stderr,
+                "%s:%i - %s: Permission to read/search a component of the filename was denied",
+                file,
+                line,
+                fn
+            );
+            break;
+        }
+        case EFAULT: {
+            fprintf(
+                stderr,
+                "%s:%i - %s: buffer points to a bad address",
+                file,
+                line,
+                fn
+            );
+            break;
+        }
+        case EINVAL: {
+            fprintf(
+                stderr,
+                "%s:%i - %s: The size argument is zero and buf is not a NULL pointer",
+                file,
+                line,
+                fn
+            );
+            break;
+        }
+        case ENAMETOOLONG: {
+            fprintf(
+                stderr,
+                "%s:%i - %s: The size of the null-terminated absolute pathname string exceeds %s bytes",
+                file,
+                line,
+                fn,
+                PATH_MAX
+            );
+            break;
+        }
+        case ENOENT: {
+            fprintf(
+                stderr,
+                "%s:%i - %s: The current working directory has been unlinked",
+                file,
+                line,
+                fn
+            );
+            break;
+        }
+        case ENOMEM: {
+            fprintf(stderr, "%s:%i - %s: Out of memory", file, line, fn);
+            break;
+        }
+        case ERANGE: {
+            fprintf(
+                stderr,
+                "%s:%i - %s: The size argument is less than the length of the absolute pathname of the working directory, including the terminating null byte",
+                file,
+                line,
+                fn
+            );
+            break;
+        }
+    }
+}
+
 //=== MAIN =====================================================================
 
 int main(void) {
-    int status;
+    int status = 0;
     prompt_t* prompt = (prompt_t*)malloc(sizeof(prompt_t));
     init_prompt(prompt);
     if (prompt->init_error) {
