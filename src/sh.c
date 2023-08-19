@@ -1,5 +1,6 @@
 #include "sh.h"
 
+#include <limits.h>
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
@@ -123,6 +124,7 @@ static inline void init_prompt(prompt_t* prompt) {
         || prompt->username == NULL) {
         fprintf(stderr, "sh: could not access hostname/username");
         prompt->init_error = true;
+        return;
     }
     prompt->init_error = false;
 }
@@ -174,7 +176,7 @@ void handle_cwd_error(char* file, int line, const char* fn) {
         case ENAMETOOLONG: {
             fprintf(
                 stderr,
-                "%s:%i - %s: The size of the null-terminated absolute pathname string exceeds %s bytes",
+                "%s:%i - %s: The size of the null-terminated absolute pathname string exceeds %d bytes",
                 file,
                 line,
                 fn,
