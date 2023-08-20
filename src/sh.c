@@ -1,6 +1,5 @@
 #include "sh.h"
 
-#include <limits.h>
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
@@ -36,12 +35,11 @@ static char** sh_split_line(char* line) {
     while (token != NULL) {
         tokens[position] = token;
         position++;
-
         if (position >= bufsize) {
             bufsize += BUFSIZE;
             tokens = realloc(tokens, bufsize * sizeof(char*));
             if (tokens == NULL) {
-                fprintf(stderr, "sh: realocation error\n");
+                fprintf(stderr, "sh: reallocation error\n");
                 exit(EXIT_FAILURE);
             }
         }
@@ -91,6 +89,7 @@ static int sh_help(char** args) {
     UNUSED(args);
     printf("SHELL\n");
     printf("Built-ins:\n");
+#pragma unroll
     for (int i = 0; i < 3; i++) {
         printf("%s\n", builtins[i]);
     }
@@ -108,6 +107,7 @@ static int sh_execute(char** args) {
     if (args[0] == NULL) {
         return 1;
     }
+#pragma unroll
     for (int i = 0; i < 3; i++) {
         if (strcmp(args[0], builtins[i]) == 0) {
             return (*builtins_func[i])(args);
@@ -120,8 +120,12 @@ static int sh_execute(char** args) {
 
 static inline void init_prompt(prompt_t* prompt) {
     prompt->username = getlogin();
-    if (gethostname(prompt->hostname, sizeof(prompt->hostname)) == -1
-        || prompt->username == NULL) {
+    // clang-format off
+    if (
+        gethostname(prompt->hostname, sizeof(prompt->hostname)) == -1
+        || prompt->username == NULL
+    ) {
+        // clang-format on
         fprintf(stderr, "sh: could not access hostname/username");
         prompt->init_error = true;
         return;
@@ -130,7 +134,7 @@ static inline void init_prompt(prompt_t* prompt) {
 }
 
 static inline void draw_prompt(char* username, char* hostname) {
-    char cwd[1024];
+    char cwd[BUFSIZE];
     if (getcwd(cwd, sizeof(cwd)) == NULL) {
         handle_cwd_error(__FILE_NAME__, __LINE__, __func__);
         return;

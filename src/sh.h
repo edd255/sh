@@ -1,9 +1,9 @@
-#ifndef HOME_EDD_CODE_SH_SRC_SH_H
-#define HOME_EDD_CODE_SH_SRC_SH_H
+#ifndef SH_H
+#define SH_H
 
 #include <stdbool.h>
 
-enum { BUFSIZE = 64 };
+enum { BUFSIZE = 1024 };
 #define DELIMITER " \t\r\n\a"
 
 #define UNUSED(x) (void)x
@@ -13,7 +13,7 @@ struct prompt_t {
     char* username;
     char hostname[256];
     bool init_error;
-} __attribute__((aligned(128))) __attribute__((packed));
+};
 
 static char* sh_read_line(void);
 static char** sh_split_line(char* line);
