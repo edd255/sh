@@ -72,7 +72,7 @@ static int sh_launch(char** args) {
 
 //=== BUILTINS =================================================================
 
-static const char* builtins[] = {"cd", "help", "exit"};
+static char* const builtins[] = {"cd", "help", "exit"};
 
 static int sh_cd(char** args) {
     if (args[1] == NULL) {
