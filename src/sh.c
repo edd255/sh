@@ -72,7 +72,7 @@ static int sh_launch(char** args) {
 
 //=== BUILTINS =================================================================
 
-static char* builtins[] = {"cd", "help", "exit"};
+static const char* builtins[] = {"cd", "help", "exit"};
 
 static int sh_cd(char** args) {
     if (args[1] == NULL) {
@@ -101,7 +101,7 @@ static int sh_exit(char** args) {
     return 0;
 }
 
-static int (*builtins_func[])(char**) = {&sh_cd, &sh_help, &sh_exit};
+static int (*const builtins_func[])(char**) = {&sh_cd, &sh_help, &sh_exit};
 
 static int sh_execute(char** args) {
     if (args[0] == NULL) {

@@ -11,7 +11,7 @@ enum { BUFSIZE = 1024 };
 typedef struct prompt_t prompt_t;
 struct prompt_t {
     char* username;
-    char hostname[256];
+    char hostname[BUFSIZE];
     bool init_error;
 };
 
