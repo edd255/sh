@@ -1,0 +1,9 @@
+OUTPUT_DIRECTORY       = docs
+INPUT                  = src
+RECURSIVE              = YES
+GENERATE_TREEVIEW      = YES
+DISABLE_INDEX          = NO
+FULL_SIDEBAR           = NO
+HTML_EXTRA_STYLESHEET  = /usr/local/share/doxygen-awesome-css/doxygen-awesome.css \
+                         /usr/local/share/doxygen-awesome-css/doxygen-awesome-sidebar-only.css
+HTML_COLORSTYLE        = LIGHT
