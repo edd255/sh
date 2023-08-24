@@ -43,11 +43,31 @@ $(BUILD_DIR)/%.san.o: src/%.c
 
 sanitized: $(BIN)_sanitized
 
+#---- PROFILING ----------------------------------------------------------------
+
+$(BIN)_profiling: $(patsubst src/%.c, build/%.prof.o, $(SRCS)) 
+	$(Q)$(MKDIR) $(BIN_DIR)
+	$(Q)echo -e "====> LD $@"
+	$(Q)$(CC) $(PROFILING) $+ -o $@ $(LDFLAGS) -pg
+
+$(BUILD_DIR)/%.prof.o: src/%.c
+	$(Q)echo "====> CC $@"
+	$(Q)mkdir -p $(dir $@)
+	$(Q)$(CC) $(PROFILING) $(CFLAGS) -c $< -o $@
+
+profiling: $(BIN)_profiling
+
 #---- CLEANING -----------------------------------------------------------------
 
 clean:
 	$(Q)echo "====> Cleaning..."
 	$(Q)$(RM) --recursive $(BUILD_DIR) || true
+
+#---- DOCUMENTATION ------------------------------------------------------------
+
+docs:
+	$(Q)echo "====> Creating the documentation..."
+	$(Q)doxygen > logs/doxygen.log
 
 #---- STYLE --------------------------------------------------------------------
 
@@ -90,9 +110,9 @@ uninstall:
 
 #==== EPILOGUE =================================================================
 
-all: style release debugging sanitized tests
+all: style release debugging sanitized profiling docs
 	$(Q)echo "====> Finished!"
 
 # Include the .d makefiles
 -include $(DEPS)
-.PHONY: all release debugging memcheck style install uninstall tests
+.PHONY: all release debugging memcheck style install uninstall profiling tests docs
