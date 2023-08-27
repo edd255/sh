@@ -3,12 +3,12 @@ include .config/make/config.mk
 #==== RULES ====================================================================
 #---- RELEASE ------------------------------------------------------------------
 
-$(BIN)_release: $(patsubst src/%.c, build/%.opt.o, $(SRCS))
+$(BIN)_release: $(OPT_OBJS)
 	$(Q)$(MKDIR) $(BIN_DIR)
 	$(Q)echo -e "====> LD $@"
 	$(Q)$(CC) $(RELEASE) $+ -o $@ $(LDFLAGS)
 
-$(BUILD_DIR)/%.opt.o: src/%.c
+$(BUILD_DIR)/%.opt.o: %.c
 	$(Q)echo "====> CC $@"
 	$(Q)mkdir -p $(dir $@)
 	$(Q)$(CC) $(RELEASE) $(CFLAGS) -c $< -o $@
@@ -17,12 +17,12 @@ release: $(BIN)_release
 
 #---- DEBUGGING ----------------------------------------------------------------
 
-$(BIN)_debugging: $(patsubst src/%.c, build/%.dbg.o, $(SRCS)) 
+$(BIN)_debugging: $(DBG_OBJS) 
 	$(Q)$(MKDIR) $(BIN_DIR)
 	$(Q)echo -e "====> LD $@"
 	$(Q)$(CC) $(DEBUGGING) $+ -o $@ $(LDFLAGS)
 
-$(BUILD_DIR)/%.dbg.o: src/%.c
+$(BUILD_DIR)/%.dbg.o: %.c
 	$(Q)echo "====> CC $@"
 	$(Q)mkdir -p $(dir $@)
 	$(Q)$(CC) $(DEBUGGING) $(CFLAGS) -c $< -o $@
@@ -31,12 +31,12 @@ debugging: $(BIN)_debugging
 
 #---- SANITIZED ----------------------------------------------------------------
 
-$(BIN)_sanitized: $(patsubst src/%.c, build/%.san.o, $(SRCS)) 
+$(BIN)_sanitized: $(SAN_OBJS) 
 	$(Q)$(MKDIR) $(BIN_DIR)
 	$(Q)echo -e "====> LD $@"
 	$(Q)$(CC) $(SANITIZED) $+ -o $@ $(LDFLAGS)
 
-$(BUILD_DIR)/%.san.o: src/%.c
+$(BUILD_DIR)/%.san.o: %.c
 	$(Q)echo "====> CC $@"
 	$(Q)mkdir -p $(dir $@)
 	$(Q)$(CC) $(SANITIZED) $(CFLAGS) -c $< -o $@
@@ -45,12 +45,12 @@ sanitized: $(BIN)_sanitized
 
 #---- PROFILING ----------------------------------------------------------------
 
-$(BIN)_profiling: $(patsubst src/%.c, build/%.prof.o, $(SRCS)) 
+$(BIN)_profiling: $(PROF_OBJS) 
 	$(Q)$(MKDIR) $(BIN_DIR)
 	$(Q)echo -e "====> LD $@"
 	$(Q)$(CC) $(PROFILING) $+ -o $@ $(LDFLAGS) -pg
 
-$(BUILD_DIR)/%.prof.o: src/%.c
+$(BUILD_DIR)/%.prof.o: %.c
 	$(Q)echo "====> CC $@"
 	$(Q)mkdir -p $(dir $@)
 	$(Q)$(CC) $(PROFILING) $(CFLAGS) -c $< -o $@
@@ -61,13 +61,13 @@ profiling: $(BIN)_profiling
 
 clean:
 	$(Q)echo "====> Cleaning..."
-	$(Q)$(RM) --recursive $(BUILD_DIR) || true
+	$(Q)$(RM) --recursive --force $(BUILD_DIR)/$(SRC_DIR)
 
 #---- DOCUMENTATION ------------------------------------------------------------
 
 docs:
 	$(Q)echo "====> Creating the documentation..."
-	$(Q)doxygen > logs/doxygen.log
+	$(Q)doxygen
 
 #---- STYLE --------------------------------------------------------------------
 
@@ -90,6 +90,14 @@ memcheck: debugging
 	$(Q)echo "====> Running valgrind..."
 	$(Q)valgrind ${VALGRIND_FLAGS} $(BIN)_debugging
 
+#---- TESTING ------------------------------------------------------------------
+
+tests: sanitized
+	$(Q)for test in $(TESTS); do \
+		echo "====> Running $$test..."; \
+		$(BIN)_release --filename=$$test; \
+	done
+
 #---- INSTALLING ---------------------------------------------------------------
 
 install: release
@@ -97,7 +105,7 @@ install: release
 	$(Q)cp $(BIN)_release $(PREFIX)/bin/$(NAME)
 	$(Q)echo "====> Installing the library..."
 	$(Q)$(MKDIR) $(PREFIX)/lib/lispy
-	$(Q)cp $(ASSETS)/stdlib/stdlib.lspy $(PREFIX)/lib/lispy/
+	$(Q)cp $(LIB)/stdlib.lspy $(PREFIX)/lib/lispy/
 	$(Q)echo "====> Finished!"
 	
 uninstall:
@@ -110,9 +118,9 @@ uninstall:
 
 #==== EPILOGUE =================================================================
 
-all: style release debugging sanitized profiling docs
+all: style release debugging sanitized profiling tests docs
 	$(Q)echo "====> Finished!"
 
 # Include the .d makefiles
 -include $(DEPS)
-.PHONY: all release debugging memcheck style install uninstall profiling tests docs
+.PHONY: all release debugging memcheck style install uninstall tests profiling docs

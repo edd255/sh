@@ -12,33 +12,39 @@ RM     := rm
 MKDIR  := mkdir --parents
 Q      ?= @
 
-#---- CODE DIRECTORIES ---------------------------------------------------------
-
-PROJ_SRCS := $(shell find src -type f -name "*.c" -o -name "*.h")
-SRC_DIR   := src
-SRC_DIRS  := $(SRC_DIR) $(wildcard ./deps/*)
-BUILD_DIR := build
-BIN_DIR   := bin
-INC_DIRS  := $(shell find $(SRC_DIRS) -type d)
-ASSETS    := assets
-TESTS     := $(wildcard tests/*)
-
 #---- INSTALL DIRECTORIES ------------------------------------------------------
 
 PREFIX := /usr/local
 
-#---- FILES --------------------------------------------------------------------
+#---- CODE DIRECTORIES ---------------------------------------------------------
 
-BIN  := $(BIN_DIR)/$(NAME)
-SRCS := $(shell find $(SRC_DIRS) -name '*.c')
-OBJS := $(SRCS:%.c=$(BUILD_DIR)/%.o)
-DEPS := $(OBJS:.o=.d)
+SRC_DIR   := src
+BUILD_DIR := build
+BIN_DIR   := bin
+LIB       := lib
+
+#---- CODE FILES ---------------------------------------------------------------
+
+PROJ_SRCS := $(shell find src -type f -name "*.c" -o -name "*.h")
+SRC_DIRS  := $(SRC_DIR) $(wildcard ./deps/*)
+INC_DIRS  := $(shell find $(SRC_DIRS) -type d)
+TESTS     := $(wildcard tests/*)
+
+#---- OBJECTS, BINARIES AND DEPENDENCIES ---------------------------------------
+
+BIN       := $(BIN_DIR)/$(NAME)
+SRCS      := $(shell find $(SRC_DIRS) -name '*.c')
+OPT_OBJS  := $(SRCS:%.c=$(BUILD_DIR)/%.opt.o)
+PROF_OBJS := $(SRCS:%.c=$(BUILD_DIR)/%.prof.o)
+SAN_OBJS  := $(SRCS:%.c=$(BUILD_DIR)/%.san.o)
+DBG_OBJS  := $(SRCS:%.c=$(BUILD_DIR)/%.dbg.o)
+DEPS      := $(OBJS:.o=.d)
 
 #---- FLAGS --------------------------------------------------------------------
 
 INC_FLAGS         := -I. -I$(SRC_DIR)
-LDFLAGS           += -ledit -lm -DLOGC_USE_COLOR
-CFLAGS            := $(INC_FLAGS) -MMD -MP -DLOGC_USE_COLOR
+LDFLAGS           += -ledit -lm -DLOGC_USE_COLOR -DVERSION=$(VERSION)
+CFLAGS            := $(INC_FLAGS) -MMD -MP -DLOGC_USE_COLOR -DVERSION=$(VERSION)
 MAKEFLAGS         := --jobs=$(shell nproc)
 VALGRIND          := --leak-check=full --show-leak-kinds=all --track-origins=yes
 CPPCHECK          := --enable=all --suppress=missingIncludeSystem $(INC_FLAGS)
