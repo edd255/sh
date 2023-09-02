@@ -1,0 +1,23 @@
+\doxysection{prompt.\+h}
+\hypertarget{prompt_8h_source}{}\label{prompt_8h_source}\index{src/prompt.h@{src/prompt.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ SH\_PROMPT\_H}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ SH\_PROMPT\_H}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}common.h"{}}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structprompt__t}{prompt\_t}}\ \mbox{\hyperlink{structprompt__t}{prompt\_t}};}
+\DoxyCodeLine{00007\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structprompt__t}{prompt\_t}}\ \{}
+\DoxyCodeLine{00008\ \ \ \ \ \textcolor{keywordtype}{char}*\ username;}
+\DoxyCodeLine{00009\ \ \ \ \ \textcolor{keywordtype}{char}\ hostname[BUFSIZE];}
+\DoxyCodeLine{00010\ \ \ \ \ \textcolor{keywordtype}{bool}\ init\_error;}
+\DoxyCodeLine{00011\ \};}
+\DoxyCodeLine{00012\ }
+\DoxyCodeLine{00013\ \textcolor{keywordtype}{void}\ init\_prompt(\mbox{\hyperlink{structprompt__t}{prompt\_t}}*\ prompt);}
+\DoxyCodeLine{00014\ \textcolor{keywordtype}{void}\ draw\_prompt(\textcolor{keywordtype}{char}*\ username,\ \textcolor{keywordtype}{char}*\ hostname);}
+\DoxyCodeLine{00015\ \textcolor{keywordtype}{void}\ handle\_cwd\_error(\textcolor{keywordtype}{char}*\ file,\ \textcolor{keywordtype}{int}\ line,\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ fn);}
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00017\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

@@ -1,0 +1,23 @@
+\doxysection{common.\+h}
+\hypertarget{common_8h_source}{}\label{common_8h_source}\index{src/common.h@{src/common.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ SH\_H}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ SH\_H}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <stdbool.h>}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{keyword}{enum}\ \{\ BUFSIZE\ =\ 1024\ \};}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#define\ DELIMITER\ "{}\ \(\backslash\)t\(\backslash\)r\(\backslash\)n\(\backslash\)a"{}}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#define\ UNUSED(x)\ (void)x}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{keywordtype}{int}\ sh\_launch(\textcolor{keywordtype}{char}**\ args);}
+\DoxyCodeLine{00012\ \textcolor{keywordtype}{int}\ sh\_cd(\textcolor{keywordtype}{char}**\ args);}
+\DoxyCodeLine{00013\ \textcolor{keywordtype}{int}\ sh\_help(\textcolor{keywordtype}{char}**\ args);}
+\DoxyCodeLine{00014\ \textcolor{keywordtype}{int}\ sh\_exit(\textcolor{keywordtype}{char}**\ args);}
+\DoxyCodeLine{00015\ \textcolor{keywordtype}{int}\ sh\_execute(\textcolor{keywordtype}{char}**\ args);}
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00017\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}
