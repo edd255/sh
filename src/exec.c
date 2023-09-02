@@ -3,6 +3,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "common.h"
+
 //=== EXECUTING ================================================================
 
 int sh_launch(char** args) {
