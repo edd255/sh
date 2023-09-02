@@ -8,7 +8,7 @@ struct prompt_t {
     char* username;
     char hostname[BUFSIZE];
     bool init_error;
-};
+} __attribute__((aligned(128))) __attribute__((packed));
 
 void init_prompt(prompt_t* prompt);
 void draw_prompt(char* username, char* hostname);

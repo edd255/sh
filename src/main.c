@@ -5,7 +5,6 @@
 #include <unistd.h>
 
 #include "common.h"
-#include "exec.h"
 #include "parser.h"
 #include "prompt.h"
 
