@@ -88,7 +88,11 @@ analyze:
 
 memcheck: debugging
 	$(Q)echo "====> Running valgrind..."
-	$(Q)valgrind ${VALGRIND_FLAGS} $(BIN)_debugging
+	$(Q)valgrind ${VALGRIND} --tool=memcheck $(BIN)_debugging
+
+callgrind: debugging
+	$(Q)echo "====> Running valgrind..."
+	$(Q)valgrind --tool=callgrind $(BIN)_debugging
 
 #---- TESTING ------------------------------------------------------------------
 
