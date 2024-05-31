@@ -1,6 +1,7 @@
 #include "prompt.h"
 
 #include <errno.h>
+#include <string.h>
 #include <limits.h>
 #include <stdio.h>
 #include <sys/wait.h>
@@ -28,81 +29,18 @@ void init_prompt(prompt_t* prompt) {
 void draw_prompt(char* username, char* hostname) {
     char cwd[BUFSIZE];
     if (getcwd(cwd, sizeof(cwd)) == NULL) {
-        handle_cwd_error(__FILE_NAME__, __LINE__, __func__);
+        fprintf(
+            stderr,
+            "%s:%d in %s: %s",
+            __FILE__,
+            __LINE__,
+            __func__,
+            strerror(errno)
+        );
         return;
     }
     color_bgreen("%s@%s", hostname, username);
     printf(":");
     color_bpurple("%s", cwd);
     color_byellow("$ ");
-}
-
-void handle_cwd_error(char* file, int line, const char* fn) {
-    switch (errno) {
-        case EACCES: {
-            fprintf(
-                stderr,
-                "%s:%i - %s: Permission to read/search a component of the filename was denied",
-                file,
-                line,
-                fn
-            );
-            break;
-        }
-        case EFAULT: {
-            fprintf(
-                stderr,
-                "%s:%i - %s: buffer points to a bad address",
-                file,
-                line,
-                fn
-            );
-            break;
-        }
-        case EINVAL: {
-            fprintf(
-                stderr,
-                "%s:%i - %s: The size argument is zero and buf is not a NULL pointer",
-                file,
-                line,
-                fn
-            );
-            break;
-        }
-        case ENAMETOOLONG: {
-            fprintf(
-                stderr,
-                "%s:%i - %s: The size of the null-terminated absolute pathname string exceeds %d bytes",
-                file,
-                line,
-                fn,
-                PATH_MAX
-            );
-            break;
-        }
-        case ENOENT: {
-            fprintf(
-                stderr,
-                "%s:%i - %s: The current working directory has been unlinked",
-                file,
-                line,
-                fn
-            );
-            break;
-        }
-        case ENOMEM: {
-            fprintf(stderr, "%s:%i - %s: Out of memory", file, line, fn);
-            break;
-        }
-        case ERANGE: {
-            fprintf(
-                stderr,
-                "%s:%i - %s: The size argument is less than the length of the absolute pathname of the working directory, including the terminating null byte",
-                file,
-                line,
-                fn
-            );
-            break;
-        }
-    }
 }
